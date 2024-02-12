@@ -28,7 +28,8 @@ async def get_messages():
     else:
         logger.critical("Error in GET request the message service")
     logging_response = logging_response.json()["messages"]
-    return f"[{logging_response}]" + " " + messages_response.text
+    messages_response = messages_response.json()["message"]
+    return f"[{logging_response}]" + " " + messages_response
 
 @app.post("/facade_service")
 async def post_messages(msg: Message):
@@ -40,3 +41,4 @@ async def post_messages(msg: Message):
         logger.info(f"Message \"{msg.text}\" logged correctly with UUID {UUID}")
     else:
         logger.critical("Error in POST request the logging service")
+    return {"status": "success"}
