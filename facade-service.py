@@ -8,7 +8,7 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-LOGGING_SERVICE_URL = "http://localhost:8001"
+LOGGING_SERVICE_URL = "http://localhost:8003"
 MESSAGES_SERVICE_URL = "http://localhost:8002"
 
 class Message(BaseModel):
