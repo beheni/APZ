@@ -22,4 +22,5 @@ async def log(log_entity: LogEntity):
         logger.warning(f"UUID {log_entity.UUID} already exists in the log map.")
     LOGGED_MESSAGES_MAP[log_entity.UUID] = log_entity.message
     logger.info("Message logged correctly")
+    
     return {"status": "success"}
