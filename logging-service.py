@@ -7,12 +7,13 @@ from contextlib import asynccontextmanager
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-global LOGGED_MESSAGES_MAP #{UUID: "msg"}
+LOGGED_MESSAGES_MAP = None #{UUID: "msg"}
 
 async def lifespan(app: FastAPI):
     logger.log(logging.INFO, "Starting Hazelcast CLient")
     client = hazelcast.HazelcastClient()
-    LOGGED_MESSAGES_MAP = hazelcast.get_map("logged_messages").blocking()
+    global LOGGED_MESSAGES_MAP
+    LOGGED_MESSAGES_MAP = client.get_map("logged_messages").blocking()
     yield
     client.shutdown()
 
