@@ -1,12 +1,23 @@
+import logging
+import hazelcast
 from fastapi import FastAPI
 from pydantic import BaseModel
-import logging
+from contextlib import asynccontextmanager
 
-app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-LOGGED_MESSAGES_MAP = dict() #{UUID: "msg"}
+global LOGGED_MESSAGES_MAP #{UUID: "msg"}
+
+async def lifespan(app: FastAPI):
+    logger.log(logging.INFO, "Starting Hazelcast CLient")
+    client = hazelcast.HazelcastClient()
+    LOGGED_MESSAGES_MAP = hazelcast.get_map("logged_messages").blocking()
+    yield
+    client.shutdown()
+
+app = FastAPI(lifespan=lifespan)
+
 
 class LogEntity(BaseModel):
     UUID: str 
@@ -20,6 +31,6 @@ async def list_log():
 async def log(log_entity: LogEntity):
     if log_entity.UUID in LOGGED_MESSAGES_MAP.keys():
         logger.warning(f"UUID {log_entity.UUID} already exists in the log map.")
-    LOGGED_MESSAGES_MAP[log_entity.UUID] = log_entity.message
+    LOGGED_MESSAGES_MAP.put(log_entity.UUID, log_entity.message)
     logger.info("Message logged correctly")
     return {"status": "success"}
