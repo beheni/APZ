@@ -1,15 +1,16 @@
+from uuid import uuid4
 from fastapi import FastAPI
 from pydantic import BaseModel
-from uuid import uuid4
-import requests
+import random
 import logging
+import requests
 
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 LOGGING_SERVICE_URLS = ["http://localhost:8001", "http://localhost:8002", "http://localhost:8003"]
-MESSAGES_SERVICE_URL = "http://localhost:8002"
+MESSAGES_SERVICE_URL = "http://localhost:8004"
 
 def get_random_logging_client():
     return LOGGING_SERVICE_URLS[random.randint(0, 2)]

@@ -19,7 +19,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-
 class LogEntity(BaseModel):
     UUID: str 
     message: str
@@ -30,8 +29,8 @@ async def list_log():
 
 @app.post("/log")
 async def log(log_entity: LogEntity):
-    if log_entity.UUID in LOGGED_MESSAGES_MAP.keys():
+    if LOGGED_MESSAGES_MAP.contains_key(log_entity.UUID):
         logger.warning(f"UUID {log_entity.UUID} already exists in the log map.")
     LOGGED_MESSAGES_MAP.put(log_entity.UUID, log_entity.message)
-    logger.info("Message logged correctly")
+    logger.info(f"Message with text {log_entity.message} logged correctly")
     return {"status": "success"}
