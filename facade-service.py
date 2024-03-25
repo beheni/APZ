@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 LOGGING_SERVICE_URLS = ["http://localhost:8001", "http://localhost:8002", "http://localhost:8003"]
-MESSAGES_SERVICE_URL = ["http://localhost:8004", "http://localhost:8005"]
+MESSAGES_SERVICE_URLS = ["http://localhost:8004", "http://localhost:8005"]
 
 MESSAGES_QUEUE = None
 
@@ -32,7 +32,7 @@ app = FastAPI(lifespan=lifespan)
 def get_random_logging_client():
     return LOGGING_SERVICE_URLS[random.randint(0, 2)]
 def get_random_message_client():
-    return MESSAGES_SERVICE_URL[random.randint(0, 1)]
+    return MESSAGES_SERVICE_URLS[random.randint(0, 1)]
 
 class Message(BaseModel):
     text: str
@@ -67,7 +67,7 @@ async def post_messages(msg: Message):
         logger.critical("Error in POST request the logging service")
 
     global MESSAGES_QUEUE
-    MESSAGES_QUEUE.put(msg.text).blocking()
+    MESSAGES_QUEUE.put(msg.text)
     logger.info(f"Message \"{msg.text}\" added to queue correctly")
     return {"status": "success"}
 
