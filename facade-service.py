@@ -16,16 +16,15 @@ MESSAGES_SERVICE_URLS = ["http://localhost:8004", "http://localhost:8005"]
 
 MESSAGES_QUEUE = None
 
-def setup_mq(): 
+@asynccontextmanager
+
+async def lifespan(app: FastAPI):
     logger.info("Setting up message queue")
     global MESSAGES_QUEUE
-    hz_client = hazelcast.HazelcastClient()
-    MESSAGES_QUEUE = hz_client.get_queue("messages_queue").blocking()    
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    setup_mq()
+    client = hazelcast.HazelcastClient(cluster_members=["localhost:5701"])
+    MESSAGES_QUEUE = client.get_queue("messages_queue").blocking()    
     yield
+    client.shutdown()
 
 app = FastAPI(lifespan=lifespan)
 
