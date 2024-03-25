@@ -30,9 +30,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 def get_random_logging_client():
-    return LOGGING_SERVICE_URLS[random.randint(0, 2)]
+    return LOGGING_SERVICE_URLS[random.randint(0, 0)]
 def get_random_message_client():
-    return MESSAGES_SERVICE_URLS[random.randint(0, 1)]
+    return MESSAGES_SERVICE_URLS[random.randint(0, 0)]
 
 class Message(BaseModel):
     text: str
