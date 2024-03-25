@@ -1,16 +1,33 @@
 from uuid import uuid4
 from fastapi import FastAPI
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 import random
 import logging
 import requests
+import hazelcast
 
-app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 LOGGING_SERVICE_URLS = ["http://localhost:8001", "http://localhost:8002", "http://localhost:8003"]
-MESSAGES_SERVICE_URL = "http://localhost:8004"
+MESSAGES_SERVICE_URL = ["http://localhost:8004", "http://localhost:8005"]
+
+MESSAGES_QUEUE = None
+
+def setup_mq(): 
+    logger.info("Setting up message queue")
+    global MESSAGES_QUEUE
+    hz_client = hazelcast.HazelcastClient()
+    MESSAGES_QUEUE = hz_client.get_queue("messages_queue").blocking()    
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    setup_mq()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 def get_random_logging_client():
     return LOGGING_SERVICE_URLS[random.randint(0, 2)]

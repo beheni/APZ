@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 LOGGED_MESSAGES_MAP = None #{UUID: "msg"}
 
+
+@asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.log(logging.INFO, "Starting Hazelcast CLient")
     client = hazelcast.HazelcastClient()
