@@ -31,6 +31,8 @@ app = FastAPI(lifespan=lifespan)
 
 def get_random_logging_client():
     return LOGGING_SERVICE_URLS[random.randint(0, 2)]
+def get_random_message_client():
+    return MESSAGES_SERVICE_URL[random.randint(0, 1)]
 
 class Message(BaseModel):
     text: str
@@ -43,7 +45,7 @@ async def get_messages():
     else:
         logger.critical("Error in GET request the logging service")
     
-    messages_response = requests.get(f"{MESSAGES_SERVICE_URL}/message")
+    messages_response = requests.get(f"{get_random_message_client()}/message")
     if messages_response.status_code == 200:
         logger.info("Message servise responded correctly")
     else:
@@ -56,11 +58,17 @@ async def get_messages():
 async def post_messages(msg: Message):
     UUID = str(uuid4())
     payload = {"UUID": UUID, "message": msg.text}
-    response = requests.post(f"{get_random_logging_client()}/log", json=payload)
     
-    if response.status_code == 200:
+    logging_response = requests.post(f"{get_random_logging_client()}/log", json=payload)
+
+    if logging_response.status_code == 200:
         logger.info(f"Message \"{msg.text}\" logged correctly with UUID {UUID}")
     else:
         logger.critical("Error in POST request the logging service")
+
+    global MESSAGES_QUEUE
+    MESSAGES_QUEUE.put(msg.text).blocking()
+    logger.info(f"Message \"{msg.text}\" added to queue correctly")
     return {"status": "success"}
+
 
